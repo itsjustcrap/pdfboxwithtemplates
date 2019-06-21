@@ -71,10 +71,25 @@ public class PDFBoxDemo {
             }
             templateDocument.close();
 
-            // if you want to secure against copy/paste, etc
-            // then this is where you would do that
-            // see the Cookbook for the example on the
-            // pdfbox page           
+            // now lock pdf
+            String uPwd = ""; // user password - use none and it Just Opens
+            String oPwd = "supersecretblendofspices";  // the "owner" password to provide edits,etc.
+            int keyLen = 128; // supposedly supports 256 but it gave me an Exception
+            AccessPermission ap = new AccessPermission();
+            StandardProtectionPolicy spp = new StandardProtectionPolicy(oPwd, uPwd, ap);
+            spp.setEncryptionKeyLength(keyLen);
+            spp.setPermissions(ap);
+            // the actual permissions
+            ap.setCanAssembleDocument(false);
+            ap.setCanExtractContent(false);            
+            ap.setCanFillInForm(false);
+            ap.setCanModify(false);
+            ap.setCanModifyAnnotations(false);
+            ap.setCanExtractForAccessibility(true); // needed for screen readers, etc
+            ap.setCanPrint(true);
+            ap.setCanPrintDegraded(true);
+            thePDF.protect(spp);
+            // done locking
 
             long unixTime = System.currentTimeMillis() / 1000L;
             thePDF.save(FILEDIR + "/output_" + unixTime + ".pdf");
